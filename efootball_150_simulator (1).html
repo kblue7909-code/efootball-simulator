@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>eFootball 익클 150뽑 시뮬레이터</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#141f32;--card:#1b2940;--text:#f3f6fb;--muted:#a8b4c7;--accent:#42d3a5;--line:#2b3a52}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#0b1220,#14233a);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);min-height:100vh;padding:24px 14px}
+main{max-width:720px;margin:0 auto}.header{text-align:center;margin:10px 0 24px}.badge{display:inline-block;background:#183c3a;color:#7ce7c5;padding:7px 12px;border-radius:99px;font-size:12px;font-weight:700;letter-spacing:.04em}.header h1{font-size:clamp(25px,6vw,36px);margin:14px 0 8px}.header p{color:var(--muted);margin:0;font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}.stat,.panel,.target{background:rgba(20,31,50,.94);border:1px solid var(--line);border-radius:16px}.stat{padding:14px 8px;text-align:center}.label{font-size:12px;color:var(--muted)}.value{font-size:clamp(21px,5vw,28px);font-weight:800;margin-top:5px}
+.panel{padding:18px;margin:14px 0}.probtop{display:flex;justify-content:space-between;gap:12px;font-size:13px;margin-bottom:10px}.probtop strong{color:var(--accent);font-size:16px}.track{height:10px;background:#26354c;border-radius:99px;overflow:hidden}.bar{height:100%;width:0;background:linear-gradient(90deg,#31b88d,#7ce7c5);border-radius:99px;transition:width .25s}.hint{font-size:12px;color:var(--muted);margin-top:9px}
+.targets{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.target{padding:14px 8px;text-align:center}.target .name{font-weight:800;font-size:17px}.target .status{font-size:12px;color:var(--muted);margin-top:7px}.target.won{border-color:#42d3a5;background:#153b37}.target.won .status{color:#7ce7c5;font-weight:700}
+button{font:inherit;cursor:pointer;border:0}.actions{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:stretch;margin:16px 0 4px}.pull{width:100%;padding:17px;border-radius:14px;background:var(--accent);color:#06251d;font-size:18px;font-weight:900;margin:16px 0 4px;box-shadow:0 8px 24px #42d3a522}.pull:disabled{opacity:.45;cursor:not-allowed}.packreset{padding:0 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--text);font-weight:800}.packreset:hover{border-color:var(--accent)}.result{min-height:104px;display:flex;flex-direction:column;justify-content:center;gap:8px}.result h2{font-size:18px;margin:0}.result p{margin:0;color:var(--muted);font-size:14px}.hit{font-size:20px;color:#7ce7c5;font-weight:900}.historyhead{display:flex;align-items:center;justify-content:space-between;gap:12px}.historyhead h2{font-size:16px;margin:0}.reset{background:transparent;color:var(--muted);text-decoration:underline;font-size:13px;padding:6px}.history{display:grid;gap:8px;margin-top:12px}.row{display:flex;justify-content:space-between;gap:12px;background:var(--card);padding:11px 13px;border-radius:10px;font-size:13px}.row strong{color:var(--text)}.foot{color:var(--muted);font-size:11px;line-height:1.6;margin:18px 4px 8px}
+@media(max-width:420px){body{padding:16px 11px}.panel{padding:14px}.targets{gap:7px}.target{padding:12px 5px}.target .name{font-size:15px}}
+</style>
+</head>
+<body>
+<main>
+  <header class="header">
+    <span class="badge">eFOOTBALL · WEEKLY BOX SIMULATOR</span>
+    <h1>익클 150뽑 시뮬레이터</h1>
+    <p>이삭 · 쿠냐 · 은다아예를 노려보자!</p>
+  </header>
+
+  <section class="stats" aria-label="뽑기 현황">
+    <div class="stat"><div class="label">진행한 뽑기</div><div class="value" id="draws">0 / 150</div></div>
+    <div class="stat"><div class="label">남은 선수</div><div class="value" id="left">150</div></div>
+    <div class="stat"><div class="label">목표 획득</div><div class="value" id="got">0 / 3</div></div>
+  </section>
+
+  <section class="panel">
+    <div class="probtop"><span>현재까지 목표 선수 1명 이상 획득할 확률</span><strong id="chance">0.00%</strong></div>
+    <div class="track"><div class="bar" id="bar"></div></div>
+    <div class="hint">150명 중 목표 선수 3명 · 중복 없이 무작위 추첨 기준</div>
+  </section>
+
+  <section class="targets" aria-label="목표 선수">
+    <div class="target" id="target-isak"><div class="name">이삭</div><div class="status">미획득</div></div>
+    <div class="target" id="target-cunha"><div class="name">쿠냐</div><div class="status">미획득</div></div>
+    <div class="target" id="target-ndiaye"><div class="name">은다아예</div><div class="status">미획득</div></div>
+  </section>
+
+  <div class="actions"><button class="pull" id="pull">⚽ 10뽑 시작!</button><button class="packreset" id="reset">↻ 팩 초기화</button></div>
+
+  <section class="panel result" id="result" aria-live="polite">
+    <h2>첫 10뽑을 기다리는 중</h2>
+    <p>버튼을 눌러 10명씩 뽑아봐. 행운을 빌어!</p>
+  </section>
+
+  <section class="panel">
+    <div class="historyhead"><h2>뽑기 기록</h2><span class="hint">팩 초기화 시 기록도 함께 삭제</span></div>
+    <div class="history" id="history"><p class="hint">아직 기록이 없어.</p></div>
+  </section>
+
+  <p class="foot">※ 실제 게임 결과가 아닌 재미용 시뮬레이터입니다. 전체 150명 중 이삭·쿠냐·은다아예가 각각 1장씩 있고, 뽑힌 선수는 다시 나오지 않는다고 가정합니다. 실제 게임의 구성 및 확률과 다를 수 있습니다.</p>
+</main>
+<script>
+(() => {
+  const targets = ["이삭", "쿠냐", "은다아예"];
+  const ids = {"이삭":"isak", "쿠냐":"cunha", "은다아예":"ndiaye"};
+  let pool = [], drawn = 0, won = new Set(), history = [];
+
+  const el = id => document.getElementById(id);
+  const chanceAt = n => {
+    if (n <= 0) return 0;
+    if (n >= 148) return 1;
+    // P(목표 3명 중 한 명 이상) = 1 - C(147,n) / C(150,n)
+    let miss = 1;
+    for (let i=0; i<3; i++) miss *= (147-i)/(150-i-n);
+    // 계산을 안정적으로 하기 위해 조합 비율을 직접 곱한다.
+    miss = 1;
+    for (let k=0; k<n; k++) miss *= (147-k)/(150-k);
+    return 1-miss;
+  };
+  function shuffle(a) {
+    for (let i=a.length-1; i>0; i--) {
+      const j=Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+  function render() {
+    el("draws").textContent = `${drawn} / 150`;
+    el("left").textContent = 150-drawn;
+    el("got").textContent = `${won.size} / 3`;
+    const chance = chanceAt(drawn);
+    el("chance").textContent = `${(chance*100).toFixed(2)}%`;
+    el("bar").style.width = `${chance*100}%`;
+    targets.forEach(name => {
+      const box=el(`target-${ids[name]}`);
+      box.classList.toggle("won",won.has(name));
+      box.querySelector(".status").textContent = won.has(name) ? "획득 완료! 🎉" : "미획득";
+    });
+    el("pull").disabled = drawn >= 150;
+    el("pull").textContent = drawn >= 150 ? "박스 소진 완료" : "⚽ 10뽑 시작!";
+    el("history").innerHTML = history.length
+      ? history.slice().reverse().map(item => `<div class="row"><span>${item.count}뽑째</span><strong>${item.hits.length ? item.hits.join(" · ") : "꽝"}</strong></div>`).join("")
+      : '<p class="hint">아직 기록이 없어.</p>';
+  }
+  function reset() {
+    pool = shuffle([...targets, ...Array.from({length:147},(_,i)=>`일반 선수 ${i+1}`)]);
+    drawn=0; won=new Set(); history=[];
+    el("result").innerHTML="<h2>새로운 150뽑 시작!</h2><p>첫 10뽑에서 누가 나올까?</p>";
+    render();
+  }
+  function pull() {
+    if (drawn >= 150) return;
+    const batch=pool.splice(0,Math.min(10,pool.length));
+    drawn += batch.length;
+    const hits=batch.filter(x=>targets.includes(x));
+    hits.forEach(x=>won.add(x));
+    history.push({count:drawn,hits});
+    const remaining=targets.filter(x=>!won.has(x));
+    el("result").innerHTML = `<h2>${drawn}뽑 결과</h2>
+      ${hits.length ? `<div class="hit">🎉 ${hits.join(" · ")} 획득!</div>` : '<div style="font-weight:800">이번 10뽑은 꽝 😭</div>'}
+      <p>남은 목표: ${remaining.length ? remaining.join(" · ") : "없음! 목표 선수 전부 획득!"}</p>
+      <p>누적 획득 확률: <strong style="color:var(--accent)">${(chanceAt(drawn)*100).toFixed(2)}%</strong></p>`;
+    render();
+  }
+  el("pull").addEventListener("click",pull);
+  el("reset").addEventListener("click",() => {
+    if (confirm("팩을 초기화할까? 남은 선수, 뽑기 횟수, 획득 기록이 모두 처음 상태로 돌아가.")) reset();
+  });
+  reset();
+})();
+</script>
+</body>
+</html>
